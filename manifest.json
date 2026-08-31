@@ -1,0 +1,10 @@
+{
+  "id": "agent-lock-guard",
+  "name": "Agent Lock Guard",
+  "version": "1.0.0",
+  "minAppVersion": "0.15.0",
+  "description": "Multi-agent concurrency control, live in-note locking banners, and collision protection for Obsidian.",
+  "author": "Obsidian WorkOS",
+  "authorUrl": "https://obsidian.md",
+  "isDesktopOnly": false
+}

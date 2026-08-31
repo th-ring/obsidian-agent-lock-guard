@@ -1,0 +1,27 @@
+﻿{
+  "name": "obsidian-agent-lock-guard",
+  "version": "1.0.0",
+  "description": "Multi-agent concurrency control, live in-note locking banners, and collision protection for Obsidian.",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs dev",
+    "build": "node esbuild.config.mjs"
+  },
+  "keywords": [
+    "obsidian",
+    "obsidian-plugin",
+    "ai-agent",
+    "concurrency",
+    "lock-guard"
+  ],
+  "author": "Obsidian WorkOS",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "builtin-modules": "^3.3.0",
+    "esbuild": "^0.20.0",
+    "obsidian": "latest",
+    "tslib": "^2.6.2",
+    "typescript": "^5.3.3"
+  }
+}
