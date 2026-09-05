@@ -9,9 +9,9 @@ import { AgentLockSettings, DEFAULT_SETTINGS } from "./types";
 
 export default class AgentLockGuardPlugin extends Plugin {
   settings: AgentLockSettings = DEFAULT_SETTINGS;
-  lockManager: LockManager;
-  bannerViewManager: BannerViewManager;
-  statusBarManager: StatusBarManager;
+  lockManager!: LockManager;
+  bannerViewManager!: BannerViewManager;
+  statusBarManager!: StatusBarManager;
   private ribbonIconEl: HTMLElement | null = null;
 
   async onload() {
@@ -31,7 +31,7 @@ export default class AgentLockGuardPlugin extends Plugin {
     this.bannerViewManager.init();
 
     // 3. Register CodeMirror Read-Only Extension
-    setEditorLockManager(this.lockManager, this.settings);
+    setEditorLockManager(this.app, this.lockManager, this.settings);
     this.registerEditorExtension(createEditorLockExtension());
 
     // 4. Register Ribbon Icon

@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "obsidian-agent-lock-guard",
   "version": "1.0.0",
   "description": "Multi-Agent Concurrency Control & Live In-Note Locking Banners for Obsidian WorkOS.",
@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "node esbuild.config.mjs dev",
     "build": "node esbuild.config.mjs",
-    "test": "node --test tests/lock.test.mjs"
+    "typecheck": "tsc --noEmit",
+    "test": "npm run typecheck && node --test tests/lock.test.mjs"
   },
   "keywords": [
     "obsidian",

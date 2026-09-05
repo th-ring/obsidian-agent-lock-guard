@@ -1,14 +1,16 @@
 import { Extension, EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
-import { Notice } from "obsidian";
+import { App, Notice } from "obsidian";
 import { LockManager } from "./lockManager";
 import { AgentLockSettings, DEFAULT_SETTINGS } from "./types";
 
+let appInstance: App | null = null;
 let activeLockManager: LockManager | null = null;
 let activeSettings: AgentLockSettings = DEFAULT_SETTINGS;
 let lastNoticeTime = 0;
 
-export function setEditorLockManager(manager: LockManager, settings?: AgentLockSettings) {
+export function setEditorLockManager(app: App, manager: LockManager, settings?: AgentLockSettings) {
+  appInstance = app;
   activeLockManager = manager;
   if (settings) activeSettings = settings;
 }
@@ -26,20 +28,32 @@ function showLockNotice() {
   }
 }
 
+export function isCurrentViewLocked(viewDom?: HTMLElement): boolean {
+  if (!activeLockManager || activeLockManager.getAllActiveLocks().length === 0) return false;
+
+  // 1. Check DOM for lock banner in active leaf or given leaf
+  const leafDom = viewDom ? viewDom.closest(".workspace-leaf") : document.querySelector(".workspace-leaf.mod-active");
+  if (leafDom?.querySelector(".agent-lock-banner") !== null) {
+    return true;
+  }
+
+  // 2. Fallback when banner is hidden or not rendered: verify active file
+  if (appInstance) {
+    const activeFile = appInstance.workspace.getActiveFile();
+    if (activeFile && activeLockManager.isFileLocked(activeFile)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 export function createEditorLockExtension(): Extension {
   // 1. Transaction filter: Hard block on ANY document changes when locked
   const transactionBlocker = EditorState.transactionFilter.of((tr) => {
     if (!activeLockManager || !tr.docChanged || !activeSettings.enableHardBlock) return tr;
 
-    // Check if any lock is active
-    const isLocked = activeLockManager.getAllActiveLocks().length > 0;
-    if (!isLocked) return tr;
-
-    // Check DOM for lock banner in active workspace leaf
-    const activeLeaf = document.querySelector(".workspace-leaf.mod-active");
-    const hasLockBanner = activeLeaf?.querySelector(".agent-lock-banner") !== null;
-
-    if (hasLockBanner) {
+    if (isCurrentViewLocked()) {
       showLockNotice();
       return []; // Cancels transaction completely!
     }
@@ -71,11 +85,7 @@ export function createEditorLockExtension(): Extension {
         return false;
       }
 
-      // Check if this specific leaf is locked
-      const dom = view.dom.closest(".workspace-leaf");
-      const hasLockBanner = dom?.querySelector(".agent-lock-banner") !== null;
-
-      if (hasLockBanner) {
+      if (isCurrentViewLocked(view.dom)) {
         event.preventDefault();
         event.stopPropagation();
         showLockNotice();
@@ -85,10 +95,7 @@ export function createEditorLockExtension(): Extension {
       return false;
     },
     paste(event, view) {
-      const dom = view.dom.closest(".workspace-leaf");
-      const hasLockBanner = dom?.querySelector(".agent-lock-banner") !== null;
-
-      if (hasLockBanner) {
+      if (isCurrentViewLocked(view.dom)) {
         event.preventDefault();
         event.stopPropagation();
         showLockNotice();
@@ -97,10 +104,7 @@ export function createEditorLockExtension(): Extension {
       return false;
     },
     cut(event, view) {
-      const dom = view.dom.closest(".workspace-leaf");
-      const hasLockBanner = dom?.querySelector(".agent-lock-banner") !== null;
-
-      if (hasLockBanner) {
+      if (isCurrentViewLocked(view.dom)) {
         event.preventDefault();
         event.stopPropagation();
         showLockNotice();
@@ -109,10 +113,7 @@ export function createEditorLockExtension(): Extension {
       return false;
     },
     drop(event, view) {
-      const dom = view.dom.closest(".workspace-leaf");
-      const hasLockBanner = dom?.querySelector(".agent-lock-banner") !== null;
-
-      if (hasLockBanner) {
+      if (isCurrentViewLocked(view.dom)) {
         event.preventDefault();
         event.stopPropagation();
         showLockNotice();
